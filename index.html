@@ -1,0 +1,212 @@
+<html>
+    <head>
+        <title>DROP DOWN WEBSite</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <body>
+        <div class="menu-bar">
+        <ul>
+            <li class="active"><a href="#"><i class="fa fa-home"></i>A</a></li>
+            <li><a href="#"><i class="fa fa-user"></i>B</a>
+            <div  class="sub-menu1">
+                <ul>
+                    <li><a href="#">G</a></li>
+                    <li><a href="#">H</a></li>
+                    <li><a href="#">I</a></li>
+                </ul>
+            </div>
+            </li>
+            <li><a href="#"><i class="fa fa-clone"></i>C</a>
+                <div  class="sub-menu1">
+                    <ul>
+                        <li><a href="#">J</a></li>
+                        <li class="hover-me"><a href="#">K</a><i class="fa fa-angle-right"></i>
+                            <div  class="sub-menu2">
+                                <ul>
+                                    <li><a href="#">M</a></li>
+                                    <li><a href="#">N</a></li>
+                                    <li><a href="#">O</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="hover-me"><a href="#">L</a><i class="fa fa-angle-right"></i>
+                            <div  class="sub-menu2">
+                                <ul>
+                                    <li><a href="#">P</a></li>
+                                    <li><a href="#">Q</a></li>
+                                    <li><a href="#">R</a></li>
+                                    <li><a href="#">S</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li><a href="#"><i class="fa fa-users"></i>D</a></li>
+            <li><a href="#"><i class="fa fa-angellist"></i>E</a></li>
+            <li><a href="#"><i class="fa fa-phone"></i>F</a></li>
+        </ul>
+    </div>
+<div class="better" style="float: left;">
+    <style> img{height: 200px; width: 200px; border: 2px solid black;}</style>
+    <div style="margin-left: 25%;"> Image Name <input id="namebox" type="text"><br><br></div>
+    <img id="myimg" type="file" ><label id="UpProgress" ></label><br><br>
+    <progress value="0" max="100" id="progress" style="margin-left: 35%;"></progress><br><br>
+    <button id="select" style="margin-left: 25%;" >Select Image</button>
+    <button id="upload" >Upload Image</button>
+    <button id="retrieve" >Retrieve Image</button>
+</div>
+    <br><br>
+<div class="better" style="float: right;">
+    <style> video{height: 200px; width: 200px; border: 2px solid black;}</style>
+    <div style="margin-left: 25%;"> Video Name <input id="namebox2" type="text"><br><br></div>
+    <video id="myimg2" type="sample/mp4" controls src="sample.mp4" ></video><label id="UpProgress2" ></label><br><br>
+    <progress value="0" max="100" id="progress2" style="margin-left: 35%;"></progress><br><br>
+    <button id="select2" style="margin-left: 25%;">Select Video</button>
+    <button id="upload2" >Upload Video</button>
+    <button id="retrieve2" >Retrieve Video</button>
+</div>
+ <!--------------------------FIRBASE LIBRARIES-------------------------------------------------->
+ <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-database.js"></script> 
+ <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-storage.js"></script> 
+ 
+ 
+ <script id="MainScript">
+     var FileName, FileUrl;
+     var files = [];
+     var reader;
+ 
+     const firebaseConfig = {
+   apiKey: "AIzaSyB-LlKXudr8r82RVGnOp3utffw_SEezJsA",
+   authDomain: "majorp1-d575e.firebaseapp.com",
+   databaseURL: "https://majorp1-d575e-default-rtdb.firebaseio.com",
+   projectId: "majorp1-d575e",
+   storageBucket: "majorp1-d575e.appspot.com",
+   messagingSenderId: "881250747449",
+   appId: "1:881250747449:web:f516663d9d55e45058b9e8",
+   measurementId: "G-9J1XGJMQPW"
+ };
+     // Initialize Firebase
+     firebase.initializeApp(firebaseConfig);
+     console.log(firebase);
+ 
+ //*********************************Image********************************************************
+ //---------------------------Select button------------------------------
+ document.getElementById('select').onclick = function(e){
+     const input = document.createElement('input');
+     input.type = 'file';
+     input.click();
+ 
+     input.onchange= e =>{
+         files = e.target.files;
+         reader = new FileReader();
+         reader.onload = function(){
+             document.getElementById('myimg').src = reader.result;
+         }
+         reader.readAsDataURL(files[0]);
+     }
+     input.click();
+ }
+ 
+ //------------------------------upload button--------------------------------
+ 
+ document.getElementById('upload').onclick = function(e){
+ FileName = document.getElementById('namebox').value;
+ var uploadtask = firebase.storage().ref('Images/' + FileName + ".png").put(files[0]);
+ 
+ uploadtask.on('state_changed', function(snapshot){
+     //var progress = (snapshot.bytesTranferred / snapshot.totalBytes)*100;
+     //document.getElementById('UpProgress').innerHTML = 'Upload' + progress +'%';
+     var percentage =
+             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+           document.getElementById("progress").value = percentage;
+ },
+ 
+ function(error){
+     alert('error in saving the image');
+ },
+ 
+ function(e){
+ uploadtask.snapshot.ref.getDownloadURL().then(function(url){
+     FileUrl = url;
+ firebase.database().ref('Pictures/' + FileName).set({
+     Name : FileName,
+     Link : FileUrl
+ });
+ alert('image uploaded');
+ }
+ );
+ });
+ }
+ 
+ //------------------------------retrieve----------------------------
+ document.getElementById('retrieve').onclick = function(){
+     FileName = document.getElementById('namebox').value;
+     firebase.database().ref('Pictures/' + FileName).on('value', function(snapshot){
+         document.getElementById('myimg').src = snapshot.val().Link;
+     });
+ }
+ 
+ //******************************Video*******************************************************
+ document.getElementById('select2').onclick = function(e){
+     const input = document.createElement('input');
+     input.type = 'file';
+     input.click();
+ 
+     input.onchange= e =>{
+         files = e.target.files;
+         reader = new FileReader();
+         reader.onload = function(){
+             document.getElementById('myimg2').src = reader.result;
+         }
+         reader.readAsDataURL(files[0]);
+     }
+     input.click();
+ }
+ 
+ //------------------------------upload button--------------------------------
+ 
+ document.getElementById('upload2').onclick = function(e){
+ FileName = document.getElementById('namebox2').value;
+ var uploadtask = firebase.storage().ref('Images/' + FileName + ".mp4").put(files[0]);
+ 
+ uploadtask.on('state_changed', function(snapshot){
+     //var progress = (snapshot.bytesTranferred / snapshot.totalBytes)*100;
+     //document.getElementById('UpProgress').innerHTML = 'Upload' + progress +'%';
+     var percentage =
+             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+           document.getElementById("progress2").value = percentage;
+ },
+ 
+ function(error){
+     alert('error in saving the video');
+ },
+ 
+ function(e){
+ uploadtask.snapshot.ref.getDownloadURL().then(function(url){
+     FileUrl = url;
+ firebase.database().ref('Videos/' + FileName).set({
+     Name : FileName,
+     Link : FileUrl
+ });
+ alert('video uploaded');
+ }
+ );
+ });
+ }
+ 
+ //------------------------------retrieve----------------------------
+ document.getElementById('retrieve2').onclick = function(){
+     FileName = document.getElementById('namebox2').value;
+     firebase.database().ref('Videos/' + FileName).on('value', function(snapshot){
+         document.getElementById('myimg2').src = snapshot.val().Link;
+     });
+ }
+     
+</script>
+    </div>
+    </body>
+</html>
