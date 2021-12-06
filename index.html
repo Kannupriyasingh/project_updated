@@ -48,25 +48,49 @@
             <li><a href="#"><i class="fa fa-phone"></i>F</a></li>
         </ul>
     </div>
-<div class="better" style="float: left;">
-    <style> img{height: 200px; width: 200px; border: 2px solid black;}</style>
+
+<!--****************ADD THE IMAGE**************************-->
+<div  class="better horizontal" style="width: 400px; height: 300px;">
+    <style> img{height: 150px; width: 150px; border: 2px solid black;}</style>
     <div style="margin-left: 25%;"> Image Name <input id="namebox" type="text"><br><br></div>
     <img id="myimg" type="file" ><label id="UpProgress" ></label><br><br>
-    <progress value="0" max="100" id="progress" style="margin-left: 35%;"></progress><br><br>
-    <button id="select" style="margin-left: 25%;" >Select Image</button>
+    <progress value="0" max="100" id="progress" style="margin-left: 25%;"></progress><br><br>
+    <div class="buttons_css">
+    <button id="select" >Select Image</button>
     <button id="upload" >Upload Image</button>
     <button id="retrieve" >Retrieve Image</button>
+    </div>
 </div>
-    <br><br>
-<div class="better" style="float: right;">
-    <style> video{height: 200px; width: 200px; border: 2px solid black;}</style>
+  
+
+<!--****************ADD THE VIDEO**************************-->
+<div class="better horizontal" style="width: 400px; height: 300px;">
+    <style> video{height: 150px; width: 150px; border: 2px solid black;}</style>
     <div style="margin-left: 25%;"> Video Name <input id="namebox2" type="text"><br><br></div>
-    <video id="myimg2" type="sample/mp4" controls src="sample.mp4" ></video><label id="UpProgress2" ></label><br><br>
-    <progress value="0" max="100" id="progress2" style="margin-left: 35%;"></progress><br><br>
-    <button id="select2" style="margin-left: 25%;">Select Video</button>
+    <video autoplay id="myvideo" type="sample/mp4" controls src="sample.mp4" ></video><label id="UpProgress2" ></label><br><br>
+    <progress value="0" max="100" id="progress2" style="margin-left: 25%;"></progress><br><br>
+    <div class="buttons_css">
+    <button id="select2">Select Video</button>
     <button id="upload2" >Upload Video</button>
     <button id="retrieve2" >Retrieve Video</button>
+    </div>
 </div>
+ 
+
+<!--****************ADD THE AUDIO**************************-->
+<div class="better horizontal" style="width: 400px; height: 300px;">
+    <style> audio{height: 168.5px; width: 250px; }</style>
+    <div style="margin-left: 25%;"> Audio Name <input id="namebox3" type="text"><br><br></div>
+    <audio style="margin-left: 22%;" id="myaudio" type="sample/mp3" controls src="sample.mp3" ></audio><label id="UpProgress3" ></label><br><br>
+    <progress value="0" max="100" id="progress3" style="margin-left: 25%;"></progress><br><br>
+    <div class="buttons_css">
+    <button id="select3">Select Audio</button>
+    <button id="upload3" >Upload Audio</button>
+    <button id="retrieve3" >Retrieve Audio</button>
+    </div>
+</div>
+
+
  <!--------------------------FIRBASE LIBRARIES-------------------------------------------------->
  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
@@ -151,6 +175,7 @@
  }
  
  //******************************Video*******************************************************
+ //---------------------------Select button------------------------------
  document.getElementById('select2').onclick = function(e){
      const input = document.createElement('input');
      input.type = 'file';
@@ -160,7 +185,7 @@
          files = e.target.files;
          reader = new FileReader();
          reader.onload = function(){
-             document.getElementById('myimg2').src = reader.result;
+             document.getElementById('myvideo').src = reader.result;
          }
          reader.readAsDataURL(files[0]);
      }
@@ -171,7 +196,7 @@
  
  document.getElementById('upload2').onclick = function(e){
  FileName = document.getElementById('namebox2').value;
- var uploadtask = firebase.storage().ref('Images/' + FileName + ".mp4").put(files[0]);
+ var uploadtask = firebase.storage().ref('Videos/' + FileName + ".mp4").put(files[0]);
  
  uploadtask.on('state_changed', function(snapshot){
      //var progress = (snapshot.bytesTranferred / snapshot.totalBytes)*100;
@@ -192,7 +217,7 @@
      Name : FileName,
      Link : FileUrl
  });
- alert('video uploaded');
+ alert('Video uploaded');
  }
  );
  });
@@ -202,10 +227,66 @@
  document.getElementById('retrieve2').onclick = function(){
      FileName = document.getElementById('namebox2').value;
      firebase.database().ref('Videos/' + FileName).on('value', function(snapshot){
-         document.getElementById('myimg2').src = snapshot.val().Link;
+         document.getElementById('myvideo').src = snapshot.val().Link;
      });
  }
      
+//****************************************Audio*************************************
+//---------------------------Select button------------------------------
+document.getElementById('select3').onclick = function(e){
+     const input = document.createElement('input');
+     input.type = 'file';
+     input.click();
+ 
+     input.onchange= e =>{
+         files = e.target.files;
+         reader = new FileReader();
+         reader.onload = function(){
+             document.getElementById('myaudio').src = reader.result;
+         }
+         reader.readAsDataURL(files[0]);
+     }
+     input.click();
+ }
+ 
+ //------------------------------upload button--------------------------------
+ 
+ document.getElementById('upload3').onclick = function(e){
+ FileName = document.getElementById('namebox3').value;
+ var uploadtask = firebase.storage().ref('Audios/' + FileName + ".mp4").put(files[0]);
+ 
+ uploadtask.on('state_changed', function(snapshot){
+     //var progress = (snapshot.bytesTranferred / snapshot.totalBytes)*100;
+     //document.getElementById('UpProgress').innerHTML = 'Upload' + progress +'%';
+     var percentage =
+             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+           document.getElementById("progress3").value = percentage;
+ },
+ 
+ function(error){
+     alert('error in saving the image');
+ },
+ 
+ function(e){
+ uploadtask.snapshot.ref.getDownloadURL().then(function(url){
+     FileUrl = url;
+ firebase.database().ref('Audios/' + FileName).set({
+     Name : FileName,
+     Link : FileUrl
+ });
+ alert('Audio uploaded');
+ }
+ );
+ });
+ }
+ 
+ //------------------------------retrieve----------------------------
+ document.getElementById('retrieve3').onclick = function(){
+     FileName = document.getElementById('namebox3').value;
+     firebase.database().ref('Audios/' + FileName).on('value', function(snapshot){
+         document.getElementById('myaudio').src = snapshot.val().Link;
+     });
+ }
 </script>
     </div>
     </body>
